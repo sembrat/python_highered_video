@@ -3,6 +3,7 @@ import os
 import requests
 import re
 import tldextract
+import ssl
 from urllib.parse import urlparse
 
 def main():
@@ -53,6 +54,7 @@ def create_crawler_csv(input_file_name, output_file_name):
                             print("Skipping {full_url}.")
 
 def create_output_folders(output_file_name, parent_dir):
+    ssl._create_default_https_context = ssl._create_unverified_context
     # Create the parent output directory if it doesn't exist
     if not os.path.exists(parent_dir):
         os.makedirs(parent_dir)
@@ -101,7 +103,7 @@ def ensure_https_scheme(url):
     return url
 
 def fetch_html(url):
-    response = requests.get(url)
+    response = requests.get(url, verify=False)
     if response.status_code == 200:
         return response.text
     return None
