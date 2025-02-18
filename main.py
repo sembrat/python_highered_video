@@ -103,7 +103,11 @@ def ensure_https_scheme(url):
     return url
 
 def fetch_html(url):
-    response = requests.get(url, verify=False)
+    try:
+        response = requests.get(url, verify=False)
+    except requests.exceptions.RequestException as e:  # This is the correct syntax
+        print("Request error, skipping")
+        return None
     if response.status_code == 200:
         return response.text
     return None
