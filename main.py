@@ -155,6 +155,14 @@ def download_videos(parent_dir):
             if entry.is_dir():
                 subdir_path = entry.path
                 print(f"Processing {subdir_path}")
+                
+                # Read base_url.txt if it exists
+                base_url = ""
+                base_url_path = os.path.join(subdir_path, "base_url.txt")
+                if os.path.exists(base_url_path):
+                    with open(base_url_path, 'r', encoding='utf-8') as file:
+                        base_url = file.read().strip()
+                
                 for video_file in os.scandir(subdir_path):
                     if video_file.is_file() and video_file.name.startswith("video_"):
                         video_file_path = video_file.path
@@ -167,7 +175,7 @@ def download_videos(parent_dir):
 
                         if video_element and video_element.get('src'):
                             src = video_element['src']
-                            video_url = ensure_https_scheme(src)
+                            video_url = ensure_https_scheme(src, base_url)
                             video_filename = os.path.basename(src)
                             video_output_path = os.path.join(subdir_path, video_filename)
 
@@ -180,7 +188,7 @@ def download_videos(parent_dir):
                         elif iframe_element and iframe_element.get('src'):
                             src = iframe_element['src']
                             if "vimeo.com" in src:
-                                vimeo_url = ensure_https_scheme(src)
+                                vimeo_url = ensure_https_scheme(src, base_url)
                                 vimeo_id = vimeo_url.split('/')[-1]
                                 vimeo_api_url = f"https://player.vimeo.com/video/{vimeo_id}/config"
 
