@@ -66,6 +66,7 @@ def create_output_folders(output_file_name, parent_dir):
         # Iterate over the records and process the URLs
         for row in reader:
             raw_url = row.get('WEBADDR')
+            print("Processing " + raw_url + " ...")
             if raw_url:
                 full_url = ensure_https_scheme(raw_url)
                 if full_url:
@@ -104,9 +105,12 @@ def ensure_https_scheme(url):
 
 def fetch_html(url):
     try:
-        response = requests.get(url, verify=False)
+        response = requests.get(url, verify=False, timeout=10)
     except requests.exceptions.RequestException as e:  # This is the correct syntax
         print("Request error, skipping")
+        return None
+    except requests.exceptions.Timeout:
+        print("Request timed out, skipping")
         return None
     if response.status_code == 200:
         return response.text
