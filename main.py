@@ -4,7 +4,7 @@ import requests
 import re
 import tldextract
 import ssl
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 
 def main():
@@ -16,10 +16,10 @@ def main():
     #create_crawler_csv(input_file_name, output_file_name)
 
     # Step 2: Create output folders if they don't exist
-    create_output_folders(output_file_name, parent_dir)
+    #create_output_folders(output_file_name, parent_dir)
 
     # Step 3: Process videos in HTML files
-    process_videos_in_html(parent_dir)
+    #process_videos_in_html(parent_dir)
 
     # Step 4: Download videos from the source
     download_videos(parent_dir)
@@ -175,7 +175,12 @@ def download_videos(parent_dir):
 
                         if video_element and video_element.get('src'):
                             src = video_element['src']
-                            video_url = ensure_https_scheme(src, base_url)
+                            video_url = ensure_https_scheme(src)
+                            if not urlparse(video_url).netloc:
+                                # Join the base URL with the relative URL
+                                full_url = urljoin(base_url, video_url)
+                            else:
+                                full_url = video_url
                             video_filename = os.path.basename(src)
                             video_output_path = os.path.join(subdir_path, video_filename)
 
@@ -184,11 +189,11 @@ def download_videos(parent_dir):
                                 print(f"{video_output_path} already exists. Skipping download.")
                                 continue
 
-                            download_video(video_url, video_output_path)
+                            download_video(full_url, video_output_path)
                         elif iframe_element and iframe_element.get('src'):
                             src = iframe_element['src']
                             if "vimeo.com" in src:
-                                vimeo_url = ensure_https_scheme(src, base_url)
+                                vimeo_url = ensure_https_scheme(src)
                                 vimeo_id = vimeo_url.split('/')[-1]
                                 vimeo_api_url = f"https://player.vimeo.com/video/{vimeo_id}/config"
 
